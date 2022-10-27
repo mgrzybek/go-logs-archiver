@@ -1,0 +1,10 @@
+---
+consumer:
+  type: console
+producer:
+  type: console
+buffer:
+  type: memory
+  step: 5000
+locking:
+  type: local
