@@ -6,7 +6,7 @@ LAST_COMMIT = $(shell git rev-parse HEAD)
 .PHONY: help
 help: ## This help message
 	@awk -F: \
-		'/^([a-z-]+): [a-z/- ]*## (.+)$$/ {gsub(/: .*?\s*##/, "\t");print}' \
+		'/^([a-z-]+): *.* ## (.+)$$/ {gsub(/: .*?\s*##/, "\t");print}' \
 		Makefile \
 	| expand -t20 \
 	| sort
@@ -28,3 +28,6 @@ go.mod:
 
 ${BINARY}: go.mod ## Test and build the program
 	go build -o ${BINARY} main.go
+
+.PHONY: all ## Create the program
+all: ${BINARY}
