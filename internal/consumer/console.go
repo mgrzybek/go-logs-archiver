@@ -24,16 +24,6 @@ func NewConsole(logger *zap.Logger, engine *core.Engine) (Console, error) {
 	}, nil
 }
 
-func (c Console) Consume() ([]byte, error) {
-	c.logger.Debug("Starting scanning stdin…")
-	if c.scanner.Scan() {
-		c.logger.Sugar().Debugf("Stdin consumed: %v", c.scanner.Bytes())
-		return c.scanner.Bytes(), nil
-	}
-
-	return nil, c.scanner.Err()
-}
-
 func (c Console) Run() {
 	for c.scanner.Scan() {
 		c.logger.Sugar().Debugf("received: %v", c.scanner.Text())

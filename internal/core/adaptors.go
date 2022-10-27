@@ -14,7 +14,6 @@ type Message struct {
 
 // MessagesConsumer gets the data from a broker
 type MessagesConsumer interface {
-	Consume() ([]byte, error)
 	Run()
 }
 
