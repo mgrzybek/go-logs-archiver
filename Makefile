@@ -29,5 +29,9 @@ go.mod:
 ${BINARY}: go.mod ## Test and build the program
 	go build -o ${BINARY} main.go
 
-.PHONY: all ## Create the program
-all: ${BINARY}
+.PHONY: all 
+all: ${BINARY} ## Create the program
+
+.PHONY: clean
+clean: ## Clean the created artifacts
+	rm -f ${BINARY}
