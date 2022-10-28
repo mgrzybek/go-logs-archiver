@@ -121,17 +121,33 @@ func configureLogger(cmd *cobra.Command) *zap.Logger {
 }
 
 func configureConsumer(logger *zap.Logger, engine *core.Engine) core.MessagesConsumer {
+	var result core.MessagesConsumer
+	var err error
+
 	if viper.Get("consumer.type") == "console" {
-		logger.Info("Consumer created")
-		result, err := consumer.NewConsole(logger, engine)
-
-		if err != nil {
-			logger.Sugar().Panic(err)
-		}
-
-		return result
+		result, err = consumer.NewConsole(logger, engine)
 	}
 
+	if viper.Get("consumer.type") == "kafka" {
+		result, err = consumer.NewKafka(
+			logger,
+			engine,
+			[]string{viper.GetString("consumer.servers")},
+			viper.GetString("consumer.groupID"),
+			viper.GetString("consumer.offset"),
+			viper.GetString("consumer.topic"),
+		)
+	}
+
+	if err != nil {
+		logger.Sugar().Panic(err)
+	}
+
+	if result != nil {
+		logger.Info("Consumer created")
+		return result
+	}
+	
 	logger.Sugar().Panic("the given consumer type is not found.")
 	return nil
 }
