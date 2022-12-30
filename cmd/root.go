@@ -14,6 +14,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
+
+// Package cmd manages the CLI
 package cmd
 
 import (
@@ -27,9 +29,9 @@ import (
 	"go.uber.org/zap"
 
 	"go-logs-archiver/internal/buffer"
-	"go-logs-archiver/internal/lock"
 	"go-logs-archiver/internal/consumer"
 	"go-logs-archiver/internal/core"
+	"go-logs-archiver/internal/lock"
 	"go-logs-archiver/internal/producer"
 )
 
@@ -39,7 +41,7 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "go-logs-archiver",
 	Short: "Tool used to send JSON messages to a persistent backend",
-	Long: `Reads the incoming messages from the configured consumer driver 
+	Long: `Reads the incoming messages from the configured consumer driver
 and send them to the backend.
 
 For example: get messages from a kafka topic and send them to a S3 storage.`,
@@ -147,7 +149,7 @@ func configureConsumer(logger *zap.Logger, engine *core.Engine) core.MessagesCon
 		logger.Info("Consumer created")
 		return result
 	}
-	
+
 	logger.Sugar().Panic("the given consumer type is not found.")
 	return nil
 }

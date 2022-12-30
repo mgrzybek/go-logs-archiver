@@ -24,7 +24,7 @@ func getKey(ts, step int64) int64 {
 	return n.Int64() * step
 }
 
-// MessagesBuffer is used to store in a sorted way the messages while processing
+// MemoryBuffer is used to store in a sorted way the messages while processing
 type MemoryBuffer struct {
 	logger             *zap.Logger
 	store              storeMap
