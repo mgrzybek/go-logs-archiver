@@ -32,6 +32,8 @@ type MessagesBuffer interface {
 
 // LockingSystem is used to lock the read/write processes of the other modules, using a local or a network-based tool
 type LockingSystem interface {
-	Lock()
+	Lock(name string)
 	Unlock()
+
+	IsLocked() bool
 }

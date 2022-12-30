@@ -1,6 +1,9 @@
 package core
 
 import (
+	"fmt"
+	"sync"
+
 	"go.uber.org/zap"
 )
 
@@ -11,6 +14,8 @@ type Engine struct {
 	producer   MessagesProducer
 	buffer     MessagesBuffer
 	flushMutex LockingSystem
+
+	wg sync.WaitGroup
 
 	lastProcessedTimestamp int64
 	timestampChannel       chan int64
@@ -61,7 +66,7 @@ func (e *Engine) Terminate() {
 	e.logger.Sugar().Debug("Closing the channel…")
 	e.shouldTerminate = true
 	close(e.timestampChannel)
-	e.flushMutex.Lock()
+	e.wg.Wait()
 
 	e.logger.Info("Engine terminated, the buffer has been flushed.")
 	e.logger.Sugar().Infof("Received messages: %v", e.metricMessagesReceived)
@@ -78,16 +83,20 @@ func (e *Engine) flushBuffer(ts int64) {
 	}
 }
 
-// triggerFlush is a loop method watching the last timestamp inserted in order to flush the old data into the producer module
+// TriggerFlush is a loop method watching the last timestamp inserted in order to flush the old data into the producer module.
+// A mutex is used allow only one flushing process to run at a time in a clustered environmen for a given timestamp.
 func (e *Engine) TriggerFlush() {
-	e.flushMutex.Lock()
-	e.logger.Info("Terminating the TriggerFlush loop…")
+	e.logger.Info("Starting the TriggerFlush loop…")
+	e.wg.Add(1)
+	defer e.wg.Done()
+	defer e.flushMutex.Unlock()
 
 	for !e.shouldTerminate {
 		newTimestamp := <-e.timestampChannel
 		e.logger.Debug("Loop over the timestamps…")
 		for _, k := range e.buffer.GetTimestamps() {
 			if k < newTimestamp {
+				e.checkAndLock(k)
 				e.flushBuffer(k)
 			}
 		}
@@ -97,10 +106,18 @@ func (e *Engine) TriggerFlush() {
 	e.logger.Debug("Terminating the TriggerFlush loop…")
 	e.logger.Debug("Loop over the timestamps…")
 	for _, k := range e.buffer.GetTimestamps() {
+		e.checkAndLock(k)
 		e.flushBuffer(k)
 	}
+
 	e.logger.Debug("Loop over the timestamps ended")
 	e.logger.Sugar().Infof("TriggerFlush loop terminated: %v messages processed", e.metricMessagesFlushed)
+}
 
-	e.flushMutex.Unlock()
+func (e *Engine) checkAndLock(ts int64) {
+	if !e.flushMutex.IsLocked() {
+		e.logger.Sugar().Warn("The lock has been lost, reacquiring it…")
+		e.flushMutex.Lock(fmt.Sprintf("%c", ts))
+		e.logger.Sugar().Warn("The lock is ours!")
+	}
 }
