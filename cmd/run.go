@@ -14,6 +14,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
+
+// Package cmd manages the CLI
 package cmd
 
 import (
@@ -72,4 +74,6 @@ func runRun(cmd *cobra.Command) {
 	 */
 	consumer := configureConsumer(logger, &engine)
 	consumer.Run()
+
+	engine.Terminate()
 }

@@ -10,12 +10,14 @@ import (
 	"go-logs-archiver/internal/core"
 )
 
+// Console is an object implementing interface MessagesConsumer
 type Console struct {
 	engine  *core.Engine
 	logger  *zap.Logger
 	scanner *bufio.Scanner
 }
 
+// NewConsole is the constructor of the Console
 func NewConsole(logger *zap.Logger, engine *core.Engine) (Console, error) {
 	return Console{
 		engine:  engine,
@@ -24,6 +26,7 @@ func NewConsole(logger *zap.Logger, engine *core.Engine) (Console, error) {
 	}, nil
 }
 
+// Run starts the consuming process
 func (c Console) Run() {
 	for c.scanner.Scan() {
 		c.logger.Sugar().Debugf("received: %v", c.scanner.Text())
@@ -43,6 +46,4 @@ func (c Console) Run() {
 	if err := c.scanner.Err(); err != nil {
 		c.logger.Error(err.Error())
 	}
-
-	c.engine.Terminate()
 }
