@@ -29,7 +29,7 @@ go.mod:
 ${BINARY}: go.mod ## Test and build the program
 	go build -o ${BINARY} main.go
 
-.PHONY: all 
+.PHONY: all
 all: ${BINARY} ## Create the program
 
 .PHONY: clean
