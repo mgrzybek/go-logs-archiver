@@ -6,7 +6,7 @@ LAST_COMMIT = $(shell git rev-parse HEAD)
 .PHONY: help
 help: ## This help message
 	@awk -F: \
-		'/^([a-z-]+): *.* ## (.+)$$/ {gsub(/: .*?\s*##/, "\t");print}' \
+		'/^([a-z\.-]+): *.* ## (.+)$$/ {gsub(/: .*?\s*##/, "\t");print}' \
 		Makefile \
 	| expand -t20 \
 	| sort
@@ -26,8 +26,15 @@ go.mod:
 	go mod init ${MODULE}
 	go mod tidy
 
-${BINARY}: go.mod ## Test and build the program
+${BINARY}: go.mod test ## Test and build the program
 	go build -o ${BINARY} main.go
+
+c.out: ## Create the coverage file
+	go test ./... -coverprofile=c.out
+
+.PHONY: coverage
+coverage: c.out ## Show the coverage ratio per function
+	go tool cover -func=c.out
 
 .PHONY: all
 all: ${BINARY} ## Create the program
