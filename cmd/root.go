@@ -31,6 +31,7 @@ import (
 	"go-logs-archiver/internal/buffer"
 	"go-logs-archiver/internal/consumer"
 	"go-logs-archiver/internal/core"
+	"go-logs-archiver/internal/core/ports"
 	"go-logs-archiver/internal/lock"
 	"go-logs-archiver/internal/producer"
 )
@@ -122,8 +123,8 @@ func configureLogger(cmd *cobra.Command) *zap.Logger {
 	return nil
 }
 
-func configureConsumer(logger *zap.Logger, engine *core.Engine) core.MessagesConsumer {
-	var result core.MessagesConsumer
+func configureConsumer(logger *zap.Logger, engine *core.Engine) ports.MessagesConsumer {
+	var result ports.MessagesConsumer
 	var err error
 
 	if viper.Get("consumer.type") == "console" {
@@ -154,7 +155,7 @@ func configureConsumer(logger *zap.Logger, engine *core.Engine) core.MessagesCon
 	return nil
 }
 
-func configureProducer(logger *zap.Logger) core.MessagesProducer {
+func configureProducer(logger *zap.Logger) ports.MessagesProducer {
 	if viper.Get("producer.type") == "console" {
 		logger.Info("Producer created")
 		result, err := producer.NewConsole()
@@ -170,7 +171,7 @@ func configureProducer(logger *zap.Logger) core.MessagesProducer {
 	return nil
 }
 
-func configureBuffer(logger *zap.Logger) core.MessagesBuffer {
+func configureBuffer(logger *zap.Logger) ports.MessagesBuffer {
 	if viper.Get("buffer.type") == "memory" {
 		result, err := buffer.NewMemoryBuffer(logger, viper.GetInt64("buffer.step"))
 
@@ -186,14 +187,23 @@ func configureBuffer(logger *zap.Logger) core.MessagesBuffer {
 	return nil
 }
 
-func configureLock(logger *zap.Logger) core.LockingSystem {
+func configureLock(logger *zap.Logger) ports.LockingSystem {
+	var result ports.LockingSystem
+	var err error
+
 	if viper.Get("locking.type") == "local" {
-		result, err := lock.NewLockingSystem(logger, nil)
+		result, err = lock.NewLocalMutex(logger, nil)
+	}
 
-		if err != nil {
-			logger.Sugar().Panic(err)
-		}
+	if viper.Get("locking.type") == "consul" {
+		result, err = lock.NewConsulLock(logger)
+	}
 
+	if err != nil {
+		logger.Sugar().Panic(err)
+	}
+
+	if result != nil {
 		logger.Info("Lock created")
 		return result
 	}

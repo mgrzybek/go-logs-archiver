@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"go-logs-archiver/internal/core"
+	"go-logs-archiver/internal/core/domain"
 )
 
 // Console is an object implementing interface MessagesConsumer
@@ -31,7 +32,7 @@ func (c Console) Run() {
 	for c.scanner.Scan() {
 		c.logger.Sugar().Debugf("received: %v", c.scanner.Text())
 
-		buffer := core.Message{}
+		buffer := domain.Message{}
 		err := json.Unmarshal(c.scanner.Bytes(), &buffer)
 
 		if err != nil {

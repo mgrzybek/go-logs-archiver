@@ -19,9 +19,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"go-logs-archiver/internal/core"
-
 	"github.com/spf13/cobra"
+
+	"go-logs-archiver/internal/core"
 )
 
 // runCmd represents the run command
@@ -67,12 +67,11 @@ func runRun(cmd *cobra.Command) {
 	if err != nil {
 		logger.Sugar().Panic(err)
 	}
-	go engine.TriggerFlush()
 
 	/*
 	 * Consumer
 	 */
-	consumer := configureConsumer(logger, &engine)
+	consumer := configureConsumer(logger, engine)
 	consumer.Run()
 
 	engine.Terminate()

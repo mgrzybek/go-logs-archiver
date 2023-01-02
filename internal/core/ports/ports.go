@@ -1,16 +1,8 @@
-package core
+package ports
 
-// RawMessage is a simple array of bytes.
-type RawMessage []byte
-
-// RawMessages is an array of RawMessage
-type RawMessages []RawMessage
-
-// Message is a struct containing their extracted timestamp and their raw data
-type Message struct {
-	Timestamp int64 `json:"timestamp"`
-	Payload   RawMessage
-}
+import (
+	"go-logs-archiver/internal/core/domain"
+)
 
 // MessagesConsumer gets the data from a broker
 type MessagesConsumer interface {
@@ -19,20 +11,20 @@ type MessagesConsumer interface {
 
 // MessagesProducer pushes the data to the persistent storage
 type MessagesProducer interface {
-	ProduceMessages(ts int64, messages RawMessages) (int, error)
+	ProduceMessages(ts int64, messages domain.RawMessages) (int, error)
 }
 
 // MessagesBuffer is used to store in a sorted way the messages while processing
 type MessagesBuffer interface {
-	PushMessage(message *Message) error
-	PullAndDestroyMessages(ts int64) RawMessages
+	PushMessage(message *domain.Message) error
+	PullAndDestroyMessages(ts int64) domain.RawMessages
 
 	GetTimestamps() []int64
 }
 
 // LockingSystem is used to lock the read/write processes of the other modules, using a local or a network-based tool
 type LockingSystem interface {
-	Lock(name string)
+	Lock(name string) error
 	Unlock()
 
 	IsLocked() bool

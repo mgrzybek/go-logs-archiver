@@ -9,8 +9,10 @@ import (
 	"go.uber.org/zap"
 
 	"go-logs-archiver/internal/core"
+	"go-logs-archiver/internal/core/domain"
 )
 
+// Kafka is message consumer fetching message from a topic
 type Kafka struct {
 	engine   *core.Engine
 	logger   *zap.Logger
@@ -23,6 +25,7 @@ type Kafka struct {
 	metricMessagesReceived int
 }
 
+// NewKafka is the constructor
 func NewKafka(logger *zap.Logger, engine *core.Engine, bootstrapServers []string, groupID, offset, topic string) (*Kafka, error) {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
@@ -43,6 +46,7 @@ func NewKafka(logger *zap.Logger, engine *core.Engine, bootstrapServers []string
 	}, nil
 }
 
+// Run starts the topic consuming process
 func (k *Kafka) Run() {
 	var err error
 
@@ -84,7 +88,7 @@ func (k *Kafka) Run() {
 }
 
 func (k *Kafka) processMessage(message []byte) {
-	buffer := core.Message{}
+	buffer := domain.Message{}
 	err := json.Unmarshal(message, &buffer)
 	if err != nil {
 		k.logger.Sugar().Error(err)

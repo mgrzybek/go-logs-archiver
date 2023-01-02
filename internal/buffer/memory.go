@@ -7,10 +7,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"go-logs-archiver/internal/core"
+	"go-logs-archiver/internal/core/domain"
 )
 
-type storeMap map[int64]core.RawMessages
+type storeMap map[int64]domain.RawMessages
 
 // getKey provides the closest timestamp according to the given step
 func getKey(ts, step int64) int64 {
@@ -48,7 +48,7 @@ func NewMemoryBuffer(logger *zap.Logger, secondsStep int64) (*MemoryBuffer, erro
 
 // PushMessage inserts the given message into the map using the closest key
 // TODO: sort the message using their own timestamp
-func (b *MemoryBuffer) PushMessage(message *core.Message) error {
+func (b *MemoryBuffer) PushMessage(message *domain.Message) error {
 	key := getKey(message.Timestamp, b.storageStepSeconds)
 	b.logger.Sugar().Debugf("storing at key %v, value: %v", key, message.Payload)
 
@@ -63,8 +63,8 @@ func (b *MemoryBuffer) PushMessage(message *core.Message) error {
 }
 
 // PullAndDestroyMessages returns the messages of the closest given key and destroys the data
-func (b *MemoryBuffer) PullAndDestroyMessages(ts int64) core.RawMessages {
-	var result core.RawMessages
+func (b *MemoryBuffer) PullAndDestroyMessages(ts int64) domain.RawMessages {
+	var result domain.RawMessages
 
 	b.storageAccess.Lock()
 	key := getKey(ts, b.storageStepSeconds)

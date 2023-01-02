@@ -3,7 +3,7 @@ package producer
 import (
 	"fmt"
 
-	"go-logs-archiver/internal/core"
+	"go-logs-archiver/internal/core/domain"
 )
 
 // Console is an implementation of MessagesProducer
@@ -19,10 +19,13 @@ func NewConsole() (Console, error) {
 }
 
 // ProduceMessages pushes the given messages into the persistent storage
-func (c Console) ProduceMessages(ts int64, messages core.RawMessages) (int, error) {
+func (c Console) ProduceMessages(ts int64, messages domain.RawMessages) (int, error) {
 	messageCounter := 0
 	for _, m := range messages {
-		fmt.Printf("%s\n", m)
+		_, err := fmt.Printf("%s\n", m)
+		if err != nil {
+			return c.metricMessagesProducedTotal, err
+		}
 		messageCounter++
 	}
 	c.metricMessagesProducedTotal += messageCounter
