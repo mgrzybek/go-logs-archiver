@@ -36,9 +36,13 @@ c.out: ## Create the coverage file
 coverage: c.out ## Show the coverage ratio per function
 	go tool cover -func=c.out
 
+.PHONY: coverage-code
+coverage-code: c.out ## Show the covered code in a browser
+	go tool cover -html=c.out
+
 .PHONY: all
 all: ${BINARY} ## Create the program
 
 .PHONY: clean
 clean: ## Clean the created artifacts
-	rm -f ${BINARY}
+	rm -f ${BINARY} c.out
