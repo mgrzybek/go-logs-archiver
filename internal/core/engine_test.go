@@ -14,7 +14,7 @@ import (
 	"go-logs-archiver/internal/producer"
 )
 
-const EXPECTED_MESSAGES = 1000
+const ExpectedMessages = 1000
 
 func configureLogger() *zap.Logger {
 	logger, err := zap.NewDevelopment()
@@ -93,8 +93,8 @@ func TestPurgeBuffer(t *testing.T) {
 	}
 	logger.Debug("Engine created")
 
-	generateMessages(logger, engine, EXPECTED_MESSAGES)
+	generateMessages(logger, engine, ExpectedMessages)
 	engine.Terminate()
 
-	assert.Equal(t, EXPECTED_MESSAGES, engine.metricMessagesFlushed)
+	assert.Equal(t, ExpectedMessages, engine.metricMessagesFlushed)
 }
